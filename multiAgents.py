@@ -262,10 +262,36 @@ def betterEvaluationFunction(currentGameState: GameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: A combination of the current game score, the distance to
+    the closest food, and the distance to each ghost (chasing scared ghosts
+    and avoiding active ones). Terminal states use a large finite value
+    instead of infinity so that immediate wins are preferred over delayed
+    ones.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if currentGameState.isWin():
+        return 1e6
+    if currentGameState.isLose():
+        return -1e6
+
+    pos = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+
+    score = currentGameState.getScore()
+
+    if foodList:
+        score += 10.0 / min(manhattanDistance(pos, food) for food in foodList)
+
+    for ghostState in ghostStates:
+        dist = manhattanDistance(pos, ghostState.getPosition())
+        if ghostState.scaredTimer > 0:
+            score += 200.0 / (dist + 1)
+        else:
+            score -= 100.0 / (dist + 1)
+            if dist <= 2:
+                score -= 1000.0
+
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
